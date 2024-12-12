@@ -53,6 +53,19 @@ function createGiftAssignments(people) {
     return assignments;
 }
 
+// New endpoint to handle deleting a member
+app.delete('/admin/delete-member/:name', (req, res) => {
+    const name = req.params.name;
+    if (people[name]) {
+        delete people[name];
+        giftAssignments = createGiftAssignments(people);
+        lastUpdate = new Date().toLocaleString();
+        res.sendStatus(200);
+    } else {
+        res.status(404).send('Member not found');
+    }
+});
+
 // Endpoint to handle adding new members
 app.post('/admin/add-member', upload.single('photo'), (req, res) => {
     const { name, code } = req.body;
@@ -62,17 +75,24 @@ app.post('/admin/add-member', upload.single('photo'), (req, res) => {
     const photo = req.file ? `/uploads/${req.file.filename}` : '';
     people[name] = { code, photo };
     giftAssignments = createGiftAssignments(people);
+    lastUpdate = new Date().toLocaleString();
     res.sendStatus(200);
 });
 
 // Endpoint to get current people data
-app.get('/api/admin/people', (req, res) => {
-    const peopleArray = Object.keys(people).map(name => ({
-        name,
-        code: people[name].code,
-        photo: people[name].photo
-    }));
-    res.json(peopleArray);
+app.post('/admin/update-all', upload.fields(Object.keys(people).map(name => ({ name: `photo-${name}` }))), (req, res) => {
+    Object.keys(people).forEach(name => {
+        const newCode = req.body[`code-${name}`];
+        if (newCode) {
+            people[name].code = newCode;
+        }
+        if (req.files[`photo-${name}`]) {
+            people[name].photo = `/uploads/${req.files[`photo-${name}`][0].filename}`;
+        }
+    });
+    giftAssignments = createGiftAssignments(people);
+    lastUpdate = new Date().toLocaleString();
+    res.sendStatus(200);
 });
 
 // Create assignments
@@ -127,3 +147,4 @@ app.post('/admin/update-all', upload.fields(Object.keys(people).map(name => ({ n
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
+
