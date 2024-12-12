@@ -10,7 +10,7 @@
             font-family: 'Arial', sans-serif;
             text-align: center;
             padding: 50px;
-            background-image: url('Cuploads\photo-Pacco-1733993646725.jpg'); /* Add your Christmas background image URL */
+            background-image: url('https://example.com/christmas-background.jpg'); /* Add your Christmas background image URL */
             background-size: cover;
             color: #333;
         }
@@ -40,24 +40,48 @@
             cursor: pointer;
             font-size: 1em;
             border-radius: 5px;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #2e7d32;
         }
         img {
-            width: 200px;
+            width: 200px; /* Adjust size as needed */
             margin-top: 20px;
+            border-radius: 10px; /* Optional: add rounded corners */
         }
     </style>
 </head>
 <body>
     <h1>🎁 Enter Your Unique Code 🎁</h1>
-    <img src="uploads\photo-Pacco-1733993646725.jpg" alt="Welcome" /> <!-- Add your welcome image URL -->
+    <img id="randomImage" src="" alt="Random Christmas Image" style="display:none;" />
     <form id="codeForm">
         <input type="text" id="uniqueCode" placeholder="Enter Code" required>
         <button type="submit">Submit</button>
     </form>
+    <br>
+    <button onclick="window.location.href='/admin'">Go to Admin Page</button>
     <script>
+        // Array of image URLs
+        const images = [
+            'https://example.com/image1.jpg', // Replace with your actual image URLs
+            'https://example.com/image2.jpg',
+            'https://example.com/image3.jpg',
+            'https://example.com/image4.jpg'
+        ];
+
+        // Function to select a random image
+        function showRandomImage() {
+            const randomIndex = Math.floor(Math.random() * images.length);
+            const randomImage = images[randomIndex];
+            const imageElement = document.getElementById('randomImage');
+            imageElement.src = randomImage;
+            imageElement.style.display = 'block'; // Show the image
+        }
+
+        // Call the function to display a random image
+        showRandomImage();
+
         document.getElementById('codeForm').onsubmit = function(event) {
             event.preventDefault();
             const code = document.getElementById('uniqueCode').value.toLowerCase();
