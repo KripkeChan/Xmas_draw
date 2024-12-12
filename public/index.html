@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xmas Gift Exchange</title>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-image: url('Cuploads\photo-Pacco-1733993646725.jpg'); /* Add your Christmas background image URL */
+            background-size: cover;
+            color: #333;
+        }
+        h1 {
+            color: #d32f2f;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 1.2em;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #388e3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2e7d32;
+        }
+        img {
+            width: 200px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎁 Enter Your Unique Code 🎁</h1>
+    <img src="uploads\photo-Pacco-1733993646725.jpg" alt="Welcome" /> <!-- Add your welcome image URL -->
+    <form id="codeForm">
+        <input type="text" id="uniqueCode" placeholder="Enter Code" required>
+        <button type="submit">Submit</button>
+    </form>
+    <script>
+        document.getElementById('codeForm').onsubmit = function(event) {
+            event.preventDefault();
+            const code = document.getElementById('uniqueCode').value.toLowerCase();
+            window.location.href = `/gift.html?code=${code}`;
+        };
+    </script>
+</body>
+</html>

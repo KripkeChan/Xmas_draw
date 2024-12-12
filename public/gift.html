@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Gift Assignment</title>
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-image: url('https://example.com/christmas-background.jpg'); /* Add your Christmas background image URL */
+            background-size: cover;
+            color: #333;
+        }
+        h1 {
+            color: #d32f2f;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+        img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎄 You need to give a gift to: 🎄</h1>
+    <p id="giftReceiver">Loading...</p>
+    <img id="receiverPhoto" src="" alt="Receiver's Photo" style="display:none;">
+    <script>
+        async function fetchGiftReceiver() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            try {
+                const response = await fetch(`/api/gift/${code}`);
+                if (!response.ok) {
+                    throw new Error('Code not found');
+                }
+                const data = await response.json();
+                document.getElementById('giftReceiver').textContent = data.receiver;
+                if (data.photo) {
+                    const photoElement = document.getElementById('receiverPhoto');
+                    photoElement.src = data.photo;
+                    photoElement.style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('giftReceiver').textContent = error.message;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchGiftReceiver);
+    </script>
+</body>
+</html>
