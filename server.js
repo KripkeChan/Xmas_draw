@@ -26,6 +26,9 @@ let people = {
     'Justin': { code: 'justin123', photo: '' }
 };
 
+let lastUpdate = 'Never';
+let loginLogs = []; // Array to store log entries
+
 // Function to shuffle an array
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -53,56 +56,35 @@ function createGiftAssignments(people) {
     return assignments;
 }
 
-// New endpoint to handle deleting a member
-app.delete('/admin/delete-member/:name', (req, res) => {
-    const name = req.params.name;
-    if (people[name]) {
-        delete people[name];
-        giftAssignments = createGiftAssignments(people);
-        lastUpdate = new Date().toLocaleString();
-        res.sendStatus(200);
-    } else {
-        res.status(404).send('Member not found');
-    }
-});
-
-// Endpoint to handle adding new members
-app.post('/admin/add-member', upload.single('photo'), (req, res) => {
-    const { name, code } = req.body;
-    if (people[name]) {
-        return res.status(400).send('Member already exists');
-    }
-    const photo = req.file ? `/uploads/${req.file.filename}` : '';
-    people[name] = { code, photo };
-    giftAssignments = createGiftAssignments(people);
-    lastUpdate = new Date().toLocaleString();
-    res.sendStatus(200);
-});
-
-// Endpoint to get current people data
-app.post('/admin/update-all', upload.fields(Object.keys(people).map(name => ({ name: `photo-${name}` }))), (req, res) => {
-    Object.keys(people).forEach(name => {
-        const newCode = req.body[`code-${name}`];
-        if (newCode) {
-            people[name].code = newCode;
-        }
-        if (req.files[`photo-${name}`]) {
-            people[name].photo = `/uploads/${req.files[`photo-${name}`][0].filename}`;
-        }
-    });
-    giftAssignments = createGiftAssignments(people);
-    lastUpdate = new Date().toLocaleString();
-    res.sendStatus(200);
-});
-
 // Create assignments
 let giftAssignments = createGiftAssignments(people);
 
+// Endpoint to get current people data
+app.get('/api/admin/people', (req, res) => {
+    const peopleArray = Object.keys(people).map(name => ({
+        name,
+        code: people[name].code,
+        photo: people[name].photo
+    }));
+    res.json({ people: peopleArray, lastUpdate });
+});
+
+// Endpoint to retrieve login logs
+app.get('/api/admin/logs', (req, res) => {
+    res.json(loginLogs);
+});
+
+// Update the gift assignment endpoint to log code usage
 app.get('/api/gift/:code', (req, res) => {
     const code = req.params.code.toLowerCase();
     const person = Object.keys(people).find(key => people[key].code === code);
     if (person) {
         const receiver = giftAssignments[person];
+        loginLogs.push({
+            user: person,
+            time: new Date().toLocaleString()
+        });
+        console.log(`Log added: ${person} at ${new Date().toLocaleString()}`);
         res.json({ receiver, photo: people[receiver].photo });
     } else {
         res.status(404).json({ error: 'Code not found' });
@@ -129,6 +111,32 @@ app.get('/admin-dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
 });
 
+// New endpoint to handle adding new members
+app.post('/admin/add-member', upload.single('photo'), (req, res) => {
+    const { name, code } = req.body;
+    if (people[name]) {
+        return res.status(400).send('Member already exists');
+    }
+    const photo = req.file ? `/uploads/${req.file.filename}` : '';
+    people[name] = { code, photo };
+    giftAssignments = createGiftAssignments(people);
+    lastUpdate = new Date().toLocaleString();
+    res.sendStatus(200);
+});
+
+// New endpoint to handle deleting a member
+app.delete('/admin/delete-member/:name', (req, res) => {
+    const name = req.params.name;
+    if (people[name]) {
+        delete people[name];
+        giftAssignments = createGiftAssignments(people);
+        lastUpdate = new Date().toLocaleString();
+        res.sendStatus(200);
+    } else {
+        res.status(404).send('Member not found');
+    }
+});
+
 // New endpoint to handle bulk updates
 app.post('/admin/update-all', upload.fields(Object.keys(people).map(name => ({ name: `photo-${name}` }))), (req, res) => {
     Object.keys(people).forEach(name => {
@@ -141,10 +149,16 @@ app.post('/admin/update-all', upload.fields(Object.keys(people).map(name => ({ n
         }
     });
     giftAssignments = createGiftAssignments(people);
+    lastUpdate = new Date().toLocaleString();
     res.sendStatus(200);
 });
 
+// Serve the log page
+app.get('/admin/logs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'log.html'));
+});
+
+// Start the server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
-
